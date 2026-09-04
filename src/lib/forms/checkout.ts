@@ -10,3 +10,4 @@ export const checkoutSchema = z.object({
 });
 
 export type CheckoutSchema = typeof checkoutSchema;
+export type CheckoutData = z.infer<typeof checkoutSchema>;

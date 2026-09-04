@@ -19,6 +19,13 @@ function signature(menuItemId: string, selections: ComboSelection[]) {
     .join('|')}`;
 }
 
+function normalizeSelections(selections: ComboSelection[]) {
+  return [...selections].sort((a, b) => {
+    const groupComparison = a.selection_group.localeCompare(b.selection_group);
+    return groupComparison || a.menu_item_id.localeCompare(b.menu_item_id);
+  });
+}
+
 class CartStore {
   lines = $state<CartLine[]>([]);
   hydrated = $state(false);
@@ -48,7 +55,8 @@ class CartStore {
   }
 
   add(item: CustomerMenuItem, selections: ComboSelection[] = []) {
-    const key = signature(item.id, selections);
+    const normalizedSelections = normalizeSelections(selections);
+    const key = signature(item.id, normalizedSelections);
     const existing = this.lines.find((line) => line.key === key);
     if (existing) existing.quantity += 1;
     else {
@@ -59,7 +67,7 @@ class CartStore {
         itemType: item.item_type,
         unitPrice: item.selling_price,
         quantity: 1,
-        selections
+        selections: normalizedSelections
       });
     }
     this.persist();

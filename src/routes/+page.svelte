@@ -2,10 +2,21 @@
   import { onMount } from 'svelte';
   import type { PageData } from './$types';
   import { cart } from '$lib/cart/cart.svelte';
+  import type { CustomerMenuItem } from '$lib/domain/menu';
+  import ComboCustomizer from '$lib/components/ComboCustomizer.svelte';
+  import OrderFlowSheet from '$lib/components/OrderFlowSheet.svelte';
 
   let { data }: { data: PageData } = $props();
+  let cartOpen = $state(false);
+  let comboOpen = $state(false);
+  let activeCombo = $state<CustomerMenuItem | null>(null);
 
   onMount(() => cart.hydrate());
+
+  function customise(item: CustomerMenuItem) {
+    activeCombo = item;
+    comboOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -57,7 +68,7 @@
             {#if item.item_type === 'regular'}
               <button onclick={() => cart.add(item)} class="rounded-full bg-[var(--mr-olive-dark)] px-5 py-2.5 text-sm font-medium text-white">Add</button>
             {:else}
-              <button class="rounded-full bg-[var(--mr-olive-dark)] px-5 py-2.5 text-sm font-medium text-white">Customise</button>
+              <button onclick={() => customise(item)} class="rounded-full bg-[var(--mr-olive-dark)] px-5 py-2.5 text-sm font-medium text-white">Customise</button>
             {/if}
           </div>
         </article>
@@ -70,9 +81,17 @@
 
 {#if cart.itemCount > 0}
   <div class="fixed inset-x-0 bottom-4 z-50 px-4">
-    <button class="mx-auto flex w-full max-w-xl items-center justify-between rounded-full bg-[var(--mr-olive-dark)] px-6 py-4 text-white shadow-xl">
+    <button onclick={() => (cartOpen = true)} class="mx-auto flex w-full max-w-xl items-center justify-between rounded-full bg-[var(--mr-olive-dark)] px-6 py-4 text-white shadow-xl">
       <span>{cart.itemCount} {cart.itemCount === 1 ? 'item' : 'items'} · ₹{cart.subtotal}</span>
       <strong>View cart →</strong>
     </button>
   </div>
 {/if}
+
+<ComboCustomizer
+  item={activeCombo}
+  bind:open={comboOpen}
+  onAdd={(item, selections) => cart.add(item, selections)}
+/>
+
+<OrderFlowSheet bind:open={cartOpen} initialForm={data.checkoutForm} />
