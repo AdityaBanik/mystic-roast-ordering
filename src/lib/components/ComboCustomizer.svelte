@@ -1,7 +1,12 @@
 <script lang="ts">
-  import { Dialog } from 'bits-ui';
-  import { Check, X } from 'lucide-svelte';
+  import Check from '@lucide/svelte/icons/check';
+  import Sparkles from '@lucide/svelte/icons/sparkles';
   import type { ComboComponent, ComboSelection, CustomerMenuItem } from '$lib/domain/menu';
+  import { Button } from '$lib/components/ui/button';
+  import { Label } from '$lib/components/ui/label';
+  import * as RadioGroup from '$lib/components/ui/radio-group';
+  import { Separator } from '$lib/components/ui/separator';
+  import * as Sheet from '$lib/components/ui/sheet';
 
   let {
     item,
@@ -51,6 +56,10 @@
     return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 
+  function optionId(groupName: string, optionId: string) {
+    return `combo-${groupName}-${optionId}`.replace(/[^a-zA-Z0-9-_]/g, '-');
+  }
+
   function addCombo() {
     if (!item || !allGroupsSelected) {
       showErrors = true;
@@ -71,92 +80,81 @@
   }
 </script>
 
-<Dialog.Root bind:open>
-  <Dialog.Portal>
-    <Dialog.Overlay class="fixed inset-0 z-50 bg-black/45 backdrop-blur-[2px]" />
-    <Dialog.Content
-      class="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-[2rem] border border-black/10 bg-[var(--mr-paper)] shadow-2xl outline-none"
-    >
-      <div class="mx-auto mt-3 h-1.5 w-12 rounded-full bg-black/15"></div>
-      <div class="flex items-start justify-between gap-4 border-b border-black/10 px-5 pb-5 pt-4 sm:px-7">
-        <div>
-          <p class="text-xs uppercase tracking-[0.22em] text-[var(--mr-olive)]">Build your combo</p>
-          <Dialog.Title class="mr-display mt-1 text-3xl">{item?.name ?? 'Customise'}</Dialog.Title>
-          <Dialog.Description class="mt-1 text-sm text-[var(--mr-muted)]">
-            Choose one option from every group.
-          </Dialog.Description>
-        </div>
-        <Dialog.Close
-          class="grid size-10 shrink-0 place-items-center rounded-full border border-black/10 bg-white/40"
-          aria-label="Close combo customisation"
-        >
-          <X size={19} />
-        </Dialog.Close>
+<Sheet.Root bind:open>
+  <Sheet.Content
+    side="bottom"
+    showCloseButton={true}
+    class="mr-sheet mx-auto max-h-[92dvh] w-full max-w-2xl rounded-t-[1.75rem] border-x border-t border-foreground/10 bg-popover p-0"
+  >
+    <div class="mx-auto mt-2.5 h-1 w-10 rounded-full bg-foreground/15 sm:hidden"></div>
+    <Sheet.Header class="border-b border-foreground/10 px-5 pb-4 pt-5 text-left sm:px-7 sm:pt-7">
+      <div class="mb-1 flex items-center gap-2 text-primary">
+        <Sparkles class="size-3.5" />
+        <p class="mr-kicker">Build your combo</p>
       </div>
+      <Sheet.Title class="font-heading text-[1.85rem] font-semibold normal-case leading-tight tracking-[-0.035em]">
+        {item?.name ?? 'Customise'}
+      </Sheet.Title>
+      <Sheet.Description>Choose one option from each part of your combo.</Sheet.Description>
+    </Sheet.Header>
 
-      <div class="overflow-y-auto px-5 py-5 sm:px-7">
-        {#if groups.length > 0}
-          <div class="space-y-7">
-            {#each groups as group}
-              <fieldset>
-                <legend class="mb-3 flex w-full items-center justify-between gap-3">
-                  <span class="font-semibold">{groupLabel(group.name)}</span>
-                  <span class="text-xs uppercase tracking-wider text-[var(--mr-muted)]">Required · choose 1</span>
-                </legend>
-                <div class="grid gap-2">
-                  {#each group.options as option}
-                    <label
-                      class="flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-colors {selected[group.name] === option.menu_item.id
-                        ? 'border-[var(--mr-olive)] bg-[var(--mr-olive)]/10'
-                        : 'border-black/10 bg-white/35 hover:border-black/25'}"
-                    >
-                      <input
-                        class="sr-only"
-                        type="radio"
-                        name={`combo-${item?.id}-${group.name}`}
-                        value={option.menu_item.id}
-                        bind:group={selected[group.name]}
-                      />
-                      <span
-                        class="grid size-5 shrink-0 place-items-center rounded-full border {selected[group.name] === option.menu_item.id
-                          ? 'border-[var(--mr-olive-dark)] bg-[var(--mr-olive-dark)] text-white'
-                          : 'border-black/25'}"
-                      >
-                        {#if selected[group.name] === option.menu_item.id}<Check size={13} strokeWidth={3} />{/if}
-                      </span>
-                      <span class="flex-1">
-                        <span class="font-medium">{option.menu_item.name}</span>
-                        {#if option.quantity > 1}
-                          <span class="ml-1 text-sm text-[var(--mr-muted)]">× {option.quantity}</span>
-                        {/if}
-                      </span>
-                    </label>
-                  {/each}
-                </div>
-                {#if showErrors && !selected[group.name]}
-                  <p class="mt-2 text-sm text-red-700" role="alert">Choose an option for {groupLabel(group.name)}.</p>
-                {/if}
-              </fieldset>
-            {/each}
-          </div>
-        {:else}
-          <p class="rounded-2xl border border-amber-900/15 bg-amber-100/50 p-4 text-sm text-amber-950">
-            This combo has no selection groups available right now.
-          </p>
-        {/if}
-      </div>
+    <div class="overflow-y-auto px-5 py-2 sm:px-7">
+      {#if groups.length > 0}
+        {#each groups as group, groupIndex}
+          <fieldset class="py-5">
+            <legend class="mb-3 flex w-full items-baseline justify-between gap-3">
+              <span class="font-heading text-xl font-semibold tracking-[-0.025em]">{groupLabel(group.name)}</span>
+              <span class="text-[0.63rem] font-semibold uppercase tracking-[0.15em] text-primary/65">Required · choose 1</span>
+            </legend>
 
-      <div class="border-t border-black/10 bg-[var(--mr-paper)] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:px-7">
-        <button
-          type="button"
-          onclick={addCombo}
-          disabled={groups.length === 0}
-          class="flex w-full items-center justify-between rounded-full bg-[var(--mr-olive-dark)] px-6 py-4 font-medium text-white disabled:cursor-not-allowed disabled:opacity-45"
-        >
-          <span>Add combo</span>
-          <span>₹{item?.selling_price ?? 0}</span>
-        </button>
-      </div>
-    </Dialog.Content>
-  </Dialog.Portal>
-</Dialog.Root>
+            <RadioGroup.Root
+              value={selected[group.name] ?? ''}
+              onValueChange={(value) => (selected[group.name] = value)}
+              class="gap-2.5"
+            >
+              {#each group.options as option}
+                {@const id = optionId(group.name, option.menu_item.id)}
+                <Label
+                  for={id}
+                  class="group flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 normal-case tracking-normal transition-colors {selected[group.name] === option.menu_item.id
+                    ? 'border-primary/45 bg-primary/8'
+                    : 'border-foreground/10 bg-background/35 hover:border-primary/25'}"
+                >
+                  <RadioGroup.Item id={id} value={option.menu_item.id} class="border-primary/45 data-checked:border-primary" />
+                  <span class="min-w-0 flex-1 text-sm font-medium">{option.menu_item.name}</span>
+                  {#if option.quantity > 1}
+                    <span class="text-xs font-normal text-muted-foreground">× {option.quantity}</span>
+                  {/if}
+                  {#if selected[group.name] === option.menu_item.id}
+                    <Check class="size-4 text-primary" />
+                  {/if}
+                </Label>
+              {/each}
+            </RadioGroup.Root>
+
+            {#if showErrors && !selected[group.name]}
+              <p class="mt-2 text-sm text-destructive" role="alert">Choose an option for {groupLabel(group.name)}.</p>
+            {/if}
+          </fieldset>
+          {#if groupIndex < groups.length - 1}<Separator class="bg-foreground/10" />{/if}
+        {/each}
+      {:else}
+        <p class="my-5 rounded-xl border border-primary/15 bg-primary/6 p-4 text-sm leading-6 text-muted-foreground">
+          This combo has no selection groups available right now.
+        </p>
+      {/if}
+    </div>
+
+    <Sheet.Footer class="border-t border-foreground/10 bg-background/75 px-5 pb-[max(1.1rem,env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-xl sm:px-7">
+      <Button
+        size="lg"
+        onclick={addCombo}
+        disabled={groups.length === 0}
+        class="w-full justify-between px-5"
+      >
+        <span>Add combo</span>
+        <span class="font-heading text-base">₹{item?.selling_price ?? 0}</span>
+      </Button>
+    </Sheet.Footer>
+  </Sheet.Content>
+</Sheet.Root>

@@ -1,37 +1,136 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn-svelte/tailwind.css";
+@import "@fontsource-variable/noto-sans";
+@import "@fontsource-variable/playfair-display";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --mr-paper: #f3eadb;
-  --mr-paper-deep: #e7dbc7;
-  --mr-olive: #626b45;
-  --mr-olive-dark: #374126;
-  --mr-ink: #25261f;
-  --mr-muted: #6f7065;
-  --mr-line: rgba(37, 38, 31, 0.14);
-  --mr-card: rgba(255, 252, 245, 0.7);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: var(--mr-ink);
-  background: var(--mr-paper);
+  --background: #f3ecdf;
+  --foreground: #282a21;
+  --card: #f8f2e7;
+  --card-foreground: #282a21;
+  --popover: #f6efe3;
+  --popover-foreground: #282a21;
+  --primary: #465132;
+  --primary-foreground: #fbf7ee;
+  --secondary: #e9dfce;
+  --secondary-foreground: #34382a;
+  --muted: #ebe2d3;
+  --muted-foreground: #6c6c60;
+  --accent: #dfe2cb;
+  --accent-foreground: #354027;
+  --destructive: #9e3f32;
+  --border: rgba(40, 42, 33, 0.16);
+  --input: rgba(70, 81, 50, 0.34);
+  --ring: #687550;
+  --radius: 0.9rem;
+
+  --mr-paper: var(--background);
+  --mr-paper-deep: var(--secondary);
+  --mr-olive: #687550;
+  --mr-olive-dark: var(--primary);
+  --mr-ink: var(--foreground);
+  --mr-muted: var(--muted-foreground);
+  --mr-line: var(--border);
 }
 
-html { background: var(--mr-paper); }
-body { margin: 0; min-width: 320px; background: var(--mr-paper); }
-button, input, textarea, select { font: inherit; }
+@theme inline {
+  --font-sans: 'Noto Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Playfair Display Variable', Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.65);
+  --radius-md: calc(var(--radius) * 0.82);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.25);
+  --radius-2xl: calc(var(--radius) * 1.65);
+  --radius-3xl: calc(var(--radius) * 2);
+  --radius-4xl: calc(var(--radius) * 2.4);
+}
 
-.mr-display {
-  font-family: Georgia, 'Times New Roman', serif;
-  letter-spacing: -0.035em;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply scroll-smooth bg-background font-sans;
+  }
+
+  body {
+    @apply m-0 min-w-80 bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(255, 255, 255, 0.58), transparent 34rem),
+      linear-gradient(rgba(70, 81, 50, 0.018) 1px, transparent 1px);
+    background-size: auto, 100% 3rem;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background: rgba(104, 117, 80, 0.25);
+  }
 }
 
 .mr-shell {
-  width: min(100%, 1120px);
+  width: min(100%, 68rem);
   margin-inline: auto;
   padding-inline: 1rem;
 }
 
-.mr-card {
-  border: 1px solid var(--mr-line);
-  background: var(--mr-card);
-  border-radius: 1.25rem;
-  overflow: hidden;
+.mr-kicker {
+  color: color-mix(in srgb, var(--primary) 82%, transparent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.mr-product-image {
+  background-image:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.62), transparent 34%),
+    linear-gradient(145deg, #d8d5b8, #bdc39b 58%, #a7ad83);
+  box-shadow: inset 0 0 0 1px rgba(40, 42, 33, 0.08);
+}
+
+.mr-sheet {
+  box-shadow: 0 -22px 70px rgba(35, 39, 27, 0.2);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .mr-shell {
+    padding-inline: 1.5rem;
+  }
 }
